@@ -103,9 +103,8 @@ class PostCreateFormTests(TestCase):
         """Новый комментарий добавлен в базе данных."""
         comment_count = Comment.objects.count()
         comment_text = 'Текст комментария'
-        form_data={
+        form_data = {
             'text': comment_text,
-
         }
         response = self.authorized_client.post(
             reverse(
@@ -113,11 +112,13 @@ class PostCreateFormTests(TestCase):
                 kwargs={'post_id': PostCreateFormTests.post.id}
             ),
             data=form_data,
-            #follow=True
         )
         self.assertRedirects(
             response,
-            reverse('posts:post_detail', kwargs={'post_id': PostCreateFormTests.post.id})
+            reverse(
+                'posts:post_detail',
+                kwargs={'post_id': PostCreateFormTests.post.id}
+            )
         )
         self.assertEqual(Comment.objects.count(), comment_count + 1)
         self.assertTrue(
@@ -172,8 +173,8 @@ class PostCreateFormImageTests(TestCase):
 
     def test_create_post_with_image(self):
         """Пост с картинкой добавлен."""
-        posts_count = Post.objects.count()  
-        small_gif = (            
+        posts_count = Post.objects.count()
+        small_gif = (
              b'\x47\x49\x46\x38\x39\x61\x02\x00'
              b'\x01\x00\x80\x00\x00\x00\x00\x00'
              b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'

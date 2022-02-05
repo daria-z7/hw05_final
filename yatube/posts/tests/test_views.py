@@ -9,7 +9,6 @@ from django import forms
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.db import IntegrityError, transaction
 
 from posts.forms import PostForm
 from ..models import Group, Post, Follow
@@ -39,7 +38,7 @@ class PostPagesTests(TestCase):
             slug='group1',
             description='Тестовое описание1',
         )
-        small_gif = (            
+        small_gif = (        
              b'\x47\x49\x46\x38\x39\x61\x02\x00'
              b'\x01\x00\x80\x00\x00\x00\x00\x00'
              b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
@@ -211,7 +210,7 @@ class PostPagesTests(TestCase):
                 text=form_data['text'],
             ).exists()
         )
-    
+
     def test_new_post_seen_by_followers(self):
         """Новый пост попадает в избранное подписчика."""
         Follow.objects.create(user=self.user1, author=self.user)
@@ -226,30 +225,34 @@ class PostPagesTests(TestCase):
             data=form_data,
             follow=True
         )
-        following_posts_1 = Post.objects.filter(author__in=Follow.objects.filter(user=self.user1).values_list('author_id')).count()
-        author_posts = Post.objects.filter(author = self.user).count()
-        following_posts_2 = Post.objects.filter(author__in=Follow.objects.filter(user=self.user2).values_list('author_id')).count()
+        following_posts_1 = Post.objects.filter(
+            author__in=Follow.objects.filter(user=self.user1).values_list('author_id')
+        ).count()
+        author_posts = Post.objects.filter(author=self.user).count()
+        following_posts_2 = Post.objects.filter(
+            author__in=Follow.objects.filter(user=self.user2).values_list('author_id')
+        ).count()
         self.assertEqual(following_posts_1, author_posts)
         self.assertNotEqual(following_posts_2, author_posts)
-    
+
     def test_authorized_can_follow_unfollow(self):
         """Авторизованный юзер может подписываться/отписываться."""
-        following_count = Follow.objects.filter(user = self.user1).count()
+        following_count = Follow.objects.filter(user=self.user1).count()
         Follow.objects.create(user=self.user1, author=self.user)
-        following_count_2 = Follow.objects.filter(user = self.user1).count()
+        following_count_2 = Follow.objects.filter(user=self.user1).count()
         self.assertNotEqual(following_count, following_count_2)
         Follow.objects.filter(user=self.user1, author=self.user).delete()
-        following_count_3 = Follow.objects.filter(user = self.user1).count()
+        following_count_3 = Follow.objects.filter(user=self.user1).count()
         self.assertEqual(following_count, following_count_3)
 
     def test_follow_yourself(self):
         """Юзер не может подписаться на себя."""
-        following_count_1 = Follow.objects.filter(user = self.user).count()
+        following_count_1 = Follow.objects.filter(user=self.user).count()
         self.authorized_client.get(reverse(
             'posts:profile_follow',
             kwargs={'username': self.user.username}
         ))
-        following_count_2 = Follow.objects.filter(user = self.user).count()
+        following_count_2 = Follow.objects.filter(user=self.user).count()
         self.assertEqual(following_count_1, following_count_2)
 
 
@@ -293,7 +296,7 @@ class PostPagesPaginatorTests(TestCase):
             text='Текст поста 14',
             group=group_2
         )
-        small_gif = (            
+        small_gif = (      
              b'\x47\x49\x46\x38\x39\x61\x02\x00'
              b'\x01\x00\x80\x00\x00\x00\x00\x00'
              b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
@@ -314,7 +317,7 @@ class PostPagesPaginatorTests(TestCase):
         )
 
         cls.form = PostForm
-    
+
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
@@ -387,7 +390,7 @@ class PostPagesPaginatorTests(TestCase):
                 len(response.context['page_obj']),
                 post_count - page_count
             )
-    
+
     def test_index_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
         post_count = Post.objects.count()

@@ -43,10 +43,12 @@ class PostUrlTests(TestCase):
     def test_login_req_url_at_desired_loc(self):
         response = self.authorized_client.get('/create/')
         self.assertEqual(response.status_code, HTTPStatus.OK)
-    
+
     def test_login_req_url_to_add_comment(self):
         post_id = PostUrlTests.post.id
-        response = self.authorized_client.get(f'/posts/{int(post_id)}/comment/')
+        response = self.authorized_client.get(
+            f'/posts/{int(post_id)}/comment/'
+        )
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_only_author_url_at_desired_loc(self):

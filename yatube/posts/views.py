@@ -1,6 +1,5 @@
-from xmlrpc.client import boolean
 from django.shortcuts import render, redirect
-from django.shortcuts import get_object_or_404, get_list_or_404
+from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
@@ -44,7 +43,10 @@ def profile(request, username):
     page_obj = paginator.get_page(page_number)
     following: bool = False
     if request.user.is_authenticated and request.user != author:
-        follower = Follow.objects.filter(user=request.user, author=author).exists() 
+        follower = Follow.objects.filter(
+            user=request.user,
+            author=author
+        ).exists()
         if follower is True:
             following = True
     context = {
@@ -131,6 +133,7 @@ def post_edit(request, post_id):
     template = 'posts/create_post.html'
     return render(request, template, context)
 
+
 @login_required
 def add_comment(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
@@ -142,9 +145,14 @@ def add_comment(request, post_id):
         comment.save()
     return redirect('posts:post_detail', post_id=post_id)
 
+
 @login_required
 def follow_index(request):
-    posts = Post.objects.filter(author__in=Follow.objects.filter(user=request.user).values_list('author_id'))
+    posts = Post.objects.filter(
+        author__in=Follow.objects.filter(
+            user=request.user
+        ).values_list('author_id')
+    )
     paginator = Paginator(posts, page_count)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -152,6 +160,7 @@ def follow_index(request):
         'page_obj': page_obj,
     }
     return render(request, 'posts/follow.html', context)
+
 
 @login_required
 def profile_follow(request, username):
@@ -162,6 +171,7 @@ def profile_follow(request, username):
     if follower is False:
         Follow.objects.create(user=request.user, author=author)
     return redirect('posts:profile', username=username)
+
 
 @login_required
 def profile_unfollow(request, username):
