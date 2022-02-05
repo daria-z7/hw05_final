@@ -38,7 +38,7 @@ class PostPagesTests(TestCase):
             slug='group1',
             description='Тестовое описание1',
         )
-        small_gif = (        
+        small_gif = (      
              b'\x47\x49\x46\x38\x39\x61\x02\x00'
              b'\x01\x00\x80\x00\x00\x00\x00\x00'
              b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
@@ -226,11 +226,15 @@ class PostPagesTests(TestCase):
             follow=True
         )
         following_posts_1 = Post.objects.filter(
-            author__in=Follow.objects.filter(user=self.user1).values_list('author_id')
+            author__in=Follow.objects.filter(
+                user=self.user1
+            ).values_list('author_id')
         ).count()
         author_posts = Post.objects.filter(author=self.user).count()
         following_posts_2 = Post.objects.filter(
-            author__in=Follow.objects.filter(user=self.user2).values_list('author_id')
+            author__in=Follow.objects.filter(
+                user=self.user2
+            ).values_list('author_id')
         ).count()
         self.assertEqual(following_posts_1, author_posts)
         self.assertNotEqual(following_posts_2, author_posts)
@@ -296,13 +300,13 @@ class PostPagesPaginatorTests(TestCase):
             text='Текст поста 14',
             group=group_2
         )
-        small_gif = (      
+        small_gif = (    
              b'\x47\x49\x46\x38\x39\x61\x02\x00'
-             b'\x01\x00\x80\x00\x00\x00\x00\x00'
-             b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-             b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-             b'\x0A\x00\x3B'
+             + b'\x01\x00\x80\x00\x00\x00\x00\x00'
+             + b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+             + b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+             + b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+             + b'\x0A\x00\x3B'
         )
         uploaded = SimpleUploadedFile(
             name='small.gif',
