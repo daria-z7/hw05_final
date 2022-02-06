@@ -11,7 +11,7 @@ page_count = settings.PER_PAGE_COUNT
 
 
 def index(request):
-    posts = Post.objects.all()
+    posts = Post.objects.select_related('group').all()
     paginator = Paginator(posts, page_count)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -43,12 +43,10 @@ def profile(request, username):
     page_obj = paginator.get_page(page_number)
     following: bool = False
     if request.user.is_authenticated and request.user != author:
-        follower = Follow.objects.filter(
+        following = Follow.objects.filter(
             user=request.user,
             author=author
         ).exists()
-        if follower is True:
-            following = True
     context = {
         'page_obj': page_obj,
         'post_count': post_count,
@@ -167,9 +165,7 @@ def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
     if request.user == author:
         return redirect('posts:profile', username=username)
-    follower = Follow.objects.filter(user=request.user, author=author).exists()
-    if follower is False:
-        Follow.objects.create(user=request.user, author=author)
+    Follow.objects.get_or_create(user=request.user, author=author)
     return redirect('posts:profile', username=username)
 
 

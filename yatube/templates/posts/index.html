@@ -4,8 +4,8 @@
 {% block title %}
   Последние обновления на сайте
 {% endblock %}
-{% cache 20 index_page %}
 {% block content %}
+{% cache 20 index_page page_obj.number %}
   {% include 'posts/includes/switcher.html' %}
   {% for post in page_obj %}
     <article>
@@ -30,5 +30,5 @@
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}
   {% include 'posts/includes/paginator.html' %}
-  {% endblock %}
   {% endcache %}
+  {% endblock %}

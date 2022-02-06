@@ -125,17 +125,26 @@ class PostCreateFormTests(TestCase):
             Comment.objects.filter(
                 pk=Comment.objects.latest('id').id,
                 text=form_data['text'],
+                post=PostCreateFormTests.post,
+                author=self.user,
             ).exists()
         )
 
     def test_cache_index_page(self):
         """Проверка работы кеша главной страницы."""
         response = self.client.get(reverse('posts:index'))
-        data_before_clean = response
+        data_before_delete_clean = response.content
+        count_1 = Post.objects.count()
+        Post.objects.all().delete()
+        response = self.client.get(reverse('posts:index'))
+        data_before_clean = response.content
         cache.clear()
         response = self.client.get(reverse('posts:index'))
-        data_after_clean = response
-        self.assertNotEqual(data_before_clean, data_after_clean)
+        data_after_delete_clean = response.content
+        count_2 = Post.objects.count()
+        self.assertEqual(data_before_delete_clean, data_before_clean)
+        self.assertNotEqual(count_1, count_2)
+        self.assertNotEqual(data_before_delete_clean, data_after_delete_clean)
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
@@ -208,6 +217,6 @@ class PostCreateFormImageTests(TestCase):
                 pk=Post.objects.latest('id').id,
                 group=form_data['group'],
                 text=form_data['text'],
-                image='posts/small.gif',
+                image=Post.objects.latest('id').image,
             ).exists()
         )
