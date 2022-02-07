@@ -241,23 +241,31 @@ class PostPagesTests(TestCase):
 
     def test_authorized_can_follow(self):
         """Авторизованный юзер может подписываться."""
-        following_count_1 = Follow.objects.filter(user=self.user).count()
+        following_count_1 = Follow.objects.filter(
+            user=self.user
+        ).filter(author=self.user1).count()
         self.authorized_client.get(reverse(
             'posts:profile_follow',
             kwargs={'username': self.user1.username}
         ))
-        following_count_2 = Follow.objects.filter(user=self.user).count()
+        following_count_2 = Follow.objects.filter(
+            user=self.user
+        ).filter(author=self.user1).count()
         self.assertEqual(following_count_1, following_count_2 - 1)
 
     def test_authorized_can_unfollow(self):
         """Авторизованный юзер может отписываться."""
         Follow.objects.create(user=self.user, author=self.user1)
-        following_count_1 = Follow.objects.filter(user=self.user).count()
+        following_count_1 = Follow.objects.filter(
+            user=self.user
+        ).filter(author=self.user1).count()
         self.authorized_client.get(reverse(
             'posts:profile_unfollow',
             kwargs={'username': self.user1.username}
         ))
-        following_count_2 = Follow.objects.filter(user=self.user).count()
+        following_count_2 = Follow.objects.filter(
+            user=self.user
+        ).filter(author=self.user1).count()
         self.assertEqual(following_count_1, 1)
         self.assertEqual(following_count_2, 0)
 

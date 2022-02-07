@@ -212,11 +212,12 @@ class PostCreateFormImageTests(TestCase):
             reverse('posts:profile', kwargs={'username': self.user.username})
         )
         self.assertEqual(Post.objects.count(), posts_count + 1)
+        image_name = form_data['image']
         self.assertTrue(
             Post.objects.filter(
                 pk=Post.objects.latest('id').id,
                 group=form_data['group'],
                 text=form_data['text'],
-                image=Post.objects.latest('id').image,
+                image=f'{Post._meta.app_label}/{image_name}',
             ).exists()
         )
